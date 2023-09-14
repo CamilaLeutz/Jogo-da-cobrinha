@@ -23,9 +23,9 @@ const randomColor = () => { // criando cores aleatorias
     return `rgb(${red}, ${green}, ${blue})`
 }
 
-const food ={ // a comida vai carregar sua posição e a sua cor
+const food = { // a comida vai carregar sua posição e a sua cor
     x: randomPosition(), // gerando position aleatoria
-    y:randomPosition(),
+    y: randomPosition(),
     color: randomColor() // gerando cor aleatoria
 }
 
@@ -33,12 +33,12 @@ let direction, loopId
 
 const drawFood = () => {
 
-const { x, y, color } = food
+    const { x, y, color } = food
 
     ctx.shadowColor = color
     ctx.shadowBlur = 6
     ctx.fillStyle = food.color
-    ctx.fillRect( x, y, size, size)
+    ctx.fillRect(x, y, size, size)
     ctx.shadowBlur = 0
 
 }
@@ -96,13 +96,13 @@ const drawGrid = () => {
 
 const chackEat = () => {
     const head = snake[snake.length - 1]
-    if( head.x == food.x && head.y == food.y) { // se a position x da cabeça for igual a x da comida, e a da cabeça no y for igual da comida na positon y 
+    if (head.x == food.x && head.y == food.y) { // se a position x da cabeça for igual a x da comida, e a da cabeça no y for igual da comida na positon y 
         snake.push(head) // aqui a comida vai fazer parte agora da cobrinha, com as mesmas proporções da cabeça
         audio.play() // audio sendo chamado quando a cobrinha come a food 
         let x = randomPosition() // variavel x sendo guardada dentro da randomPosition(posição aleatoria)
         let y = randomPosition()// variavel y sendo guardada dentro da randomPosition(posição aleatoria)
 
-        while(snake.find((position) => position.x == x && position.y == y )) { //quando a position x e a y estiverem sendo ocupadas pela cobrinha, vai ser gerado novamente uma outr position pra food
+        while (snake.find((position) => position.x == x && position.y == y)) { //quando a position x e a y estiverem sendo ocupadas pela cobrinha, vai ser gerado novamente uma outr position pra food
             x = randomPosition() // outra position sendo gerada
             y = randomPosition()// outra position sendo gerada
         }
@@ -114,13 +114,20 @@ const chackEat = () => {
 
 const chackCollision = () => { //função de colisão
     const head = snake[snake.length - 1] // cabeça da cobra
-    const canvasLimit = canvas.width - size
+    const canvasLimit = canvas.width - size //limite do tamanho do canvas
+    const neckIndex = snake.length - 2 //posição do pescoço da cobra e não da cabeça
+    const wallCollision = head.x < 0 || head.x > canvasLimit || head.y < 0 || head.y > canvasLimit  //verificação na parede caso bata, perdemos o jogo
 
-    const wallCollision = head.x < 0 || head.x > canvasLimit || head.y < 0 || head.y > canvasLimit
-
-    if( wallCollision){
-        alert("Você perdeu!")
+    const selfCollision = snake.find((position, index) => {
+        return index < neckIndex && position.x == head.x && position.y == head.y //se o pescoço for igual a cabeça dai da gameover
+    })
+    if (wallCollision || selfCollision) { //alerta na tela pra falar que perdeu
+        gameOver()
     }
+}
+
+const gameOver = () => {
+    direction = undefined
 }
 const gameLoop = () => { //função de rodar o jogo
     clearInterval(loopId) // função de limpar o loodId que é a que guarda o id do loop
@@ -131,7 +138,7 @@ const gameLoop = () => { //função de rodar o jogo
     drawSnake() // chamando a função de criar a cobra
     chackEat() // chamando a função de juntar a comida na head cabeça
     chackCollision()
-    setTimeout(() => { 
+    setTimeout(() => {
         gameLoop()
     }, 300)
 
