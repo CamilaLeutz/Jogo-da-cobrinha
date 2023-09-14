@@ -1,6 +1,6 @@
 const canvas = document.querySelector("canvas")
 const ctx = canvas.getContext("2d")
-
+const audio = new Audio("../assets/assets_audio.mp3") //audio sendo chamado
 const size = 30 //tamanho padrão dos quadrados da cobrinha
 
 const snake = [ // array com os comandos das posições da cobrinha
@@ -94,24 +94,51 @@ const drawGrid = () => {
 
 }
 
+const chackEat = () => {
+    const head = snake[snake.length - 1]
+    if( head.x == food.x && head.y == food.y) { // se a position x da cabeça for igual a x da comida, e a da cabeça no y for igual da comida na positon y 
+        snake.push(head) // aqui a comida vai fazer parte agora da cobrinha, com as mesmas proporções da cabeça
+        audio.play() // audio sendo chamado quando a cobrinha come a food 
+        let x = randomPosition() // variavel x sendo guardada dentro da randomPosition(posição aleatoria)
+        let y = randomPosition()// variavel y sendo guardada dentro da randomPosition(posição aleatoria)
 
+        while(snake.find((position) => position.x == x && position.y == y )) { //quando a position x e a y estiverem sendo ocupadas pela cobrinha, vai ser gerado novamente uma outr position pra food
+            x = randomPosition() // outra position sendo gerada
+            y = randomPosition()// outra position sendo gerada
+        }
+        food.x = x //novos valores das variaveis 
+        food.y = y
+        food.color = randomColor()
+    }
+}
 
-const gameLoop = () => {
-    clearInterval(loopId)
-    ctx.clearRect(0, 0, 600, 600)
+const chackCollision = () => { //função de colisão
+    const head = snake[snake.length - 1] // cabeça da cobra
+    const canvasLimit = canvas.width - size
+
+    const wallCollision = head.x < 0 || head.x > canvasLimit || head.y < 0 || head.y > canvasLimit
+
+    if( wallCollision){
+        alert("Você perdeu!")
+    }
+}
+const gameLoop = () => { //função de rodar o jogo
+    clearInterval(loopId) // função de limpar o loodId que é a que guarda o id do loop
+    ctx.clearRect(0, 0, 600, 600) // posições do ...........................
     drawGrid() // chamando a função de desenhar a linha
     drawFood() // chamando a função de desenhar a comida
     moveSnake() //chamando a função de mover a cobra
     drawSnake() // chamando a função de criar a cobra
-
-    setTimeout(() => {
+    chackEat() // chamando a função de juntar a comida na head cabeça
+    chackCollision()
+    setTimeout(() => { 
         gameLoop()
     }, 300)
 
 }
 gameLoop()
 
-document.addEventListener("keydown", ({ key }) => {
+document.addEventListener("keydown", ({ key }) => { // função de pegar as teclas corretas do teclado
 
     if (key == "ArrowRight" && direction != "left") {
         direction = "right"
