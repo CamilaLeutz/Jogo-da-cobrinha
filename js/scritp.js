@@ -1,11 +1,23 @@
 const canvas = document.querySelector("canvas")
 const ctx = canvas.getContext("2d")
+
+const score = document.querySelector(".score--value")
+const finalScore = document.querySelector(".final-score > span")
+const menu = document.querySelector(".menu-screen")
+const buttonPlay = document.querySelector(".btn-play")
+
 const audio = new Audio("../assets/assets_audio.mp3") //audio sendo chamado
+
 const size = 30 //tamanho padrão dos quadrados da cobrinha
 
-const snake = [ // array com os comandos das posições da cobrinha
-    { x: 270, y: 240 }
-]
+const initialPosition = { x: 270, y: 240 } //consta com as infos da posição incial
+
+let snake = [ initialPosition ] //posição incial da cobra
+
+const incrementScore = () => {
+    score.innerText = +score.innerText + 1 //esta pegando o valor que aparece no score na tela e somando com mais um. Somando pois tem um + na frente, e com isso a string vira numero e acontece a soma
+}
+
 randomNumber = (min, max) => {
     return Math.round(Math.random() * (max - min) + min)
 }
@@ -31,16 +43,15 @@ const food = { // a comida vai carregar sua posição e a sua cor
 
 let direction, loopId
 
-const drawFood = () => {
+const drawFood = () => { // criando a comida 
 
-    const { x, y, color } = food
+    const { x, y, color } = food //posições e cor
 
     ctx.shadowColor = color
     ctx.shadowBlur = 6
     ctx.fillStyle = food.color
     ctx.fillRect(x, y, size, size)
     ctx.shadowBlur = 0
-
 }
 
 const drawSnake = () => { // função responsável por desenhar a cobrinha
@@ -97,6 +108,7 @@ const drawGrid = () => {
 const chackEat = () => {
     const head = snake[snake.length - 1]
     if (head.x == food.x && head.y == food.y) { // se a position x da cabeça for igual a x da comida, e a da cabeça no y for igual da comida na positon y 
+        incrementScore() //incrementar o score
         snake.push(head) // aqui a comida vai fazer parte agora da cobrinha, com as mesmas proporções da cabeça
         audio.play() // audio sendo chamado quando a cobrinha come a food 
         let x = randomPosition() // variavel x sendo guardada dentro da randomPosition(posição aleatoria)
@@ -110,6 +122,7 @@ const chackEat = () => {
         food.y = y
         food.color = randomColor()
     }
+
 }
 
 const chackCollision = () => { //função de colisão
@@ -128,6 +141,10 @@ const chackCollision = () => { //função de colisão
 
 const gameOver = () => {
     direction = undefined
+
+    menu.style.display = "flex" //estara mostrando o menu de gameover
+    finalScore.innerText = score.innerText //aquele score abaixo do gameover
+    canvas.style.filter = "blur(2px)" // função de deixar menos visível o jogo quando se perde pra aparecer mais o menu de gameover (desfocado)
 }
 const gameLoop = () => { //função de rodar o jogo
     clearInterval(loopId) // função de limpar o loodId que é a que guarda o id do loop
@@ -138,10 +155,10 @@ const gameLoop = () => { //função de rodar o jogo
     drawSnake() // chamando a função de criar a cobra
     chackEat() // chamando a função de juntar a comida na head cabeça
     chackCollision()
+
     setTimeout(() => {
         gameLoop()
     }, 300)
-
 }
 gameLoop()
 
@@ -162,4 +179,12 @@ document.addEventListener("keydown", ({ key }) => { // função de pegar as tecl
     if (key == "ArrowUp" && direction != "down") {
         direction = "up"
     }
+})
+
+buttonPlay.addEventListener("click", () => { // função de rodar o botão 
+    score.innerText = "00" //zera o score
+    menu.style.display = "none" // some o gameover
+    canvas.style.filter = "none" //remove o blur efeito de ficar desfocado
+
+    snake = [initialPosition]  // array com os comandos das posições da cobrinha
 })
